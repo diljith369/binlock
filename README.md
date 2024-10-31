@@ -1,12 +1,3 @@
-
-  
-██████╗ ██╗███╗   ██╗██╗      ██████╗  ██████╗██╗  ██╗
-██╔══██╗██║████╗  ██║██║     ██╔═══██╗██╔════╝██║ ██╔╝
-██████╔╝██║██╔██╗ ██║██║     ██║   ██║██║     █████╔╝ 
-██╔══██╗██║██║╚██╗██║██║     ██║   ██║██║     ██╔═██╗ 
-██████╔╝██║██║ ╚████║███████╗╚██████╔╝╚██████╗██║  ██╗
-╚═════╝ ╚═╝╚═╝  ╚═══╝╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
-
 # BinLock 🔒
 BinLock is a cross-platform security tool designed to add password protection to executable files. It consists of two main components: `binguard` for protecting binaries and `launcher` for executing protected binaries.
 
@@ -37,6 +28,8 @@ binguard -i <input_binary> -o <output_binary> -pass <password>
 Example:
 
 binguard.exe -i .\Presentation.exe -o protected.exe -pass p@ssword
+
+![binlock](https://github.com/diljith369/binlock/blob/main/binguard.png)
 
 ### Running a Protected Binary
 
@@ -69,4 +62,4 @@ launcher.exe -ipf .\protected.exe -pass p@ssword
 ## Disclaimer ⚠️
 This tool is provided as-is without any warranties and mainly for educational purposes. Users are responsible for their use of this software and should ensure compliance with local laws and regulations.
 
-![Shad0w3R](https://github.com/diljith369/Shadower/blob/main/help.png)
+
