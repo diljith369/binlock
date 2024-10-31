@@ -99,7 +99,7 @@ func CreateBinLockerFile(outputFile string, ciphertext []byte) error {
 	return nil
 }
 
-func UnlockwithoutSalt(protectedPath, password string, debug bool) error {
+func UnlockwithoutSalt(protectedPath, password string, debug bool) ([]byte, error) {
 	debugPrint := func(format string, args ...interface{}) {
 		if debug {
 			fmt.Printf(format+"\n", args...)
@@ -111,7 +111,7 @@ func UnlockwithoutSalt(protectedPath, password string, debug bool) error {
 	// Read the protected binary
 	data, err := os.ReadFile(protectedPath)
 	if err != nil {
-		return getError("failed to read protected file", err)
+		return nil, getError("failed to read protected file", err)
 	}
 
 	debugPrint("Protected file size: %d bytes", len(data))
@@ -122,18 +122,18 @@ func UnlockwithoutSalt(protectedPath, password string, debug bool) error {
 	// Create cipher
 	block, err := aes.NewCipher(padPassword(password))
 	if err != nil {
-		return getError("failed to create cipher", err)
+		return nil, getError("failed to create cipher", err)
 	}
 
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return getError("failed to create GCM", err)
+		return nil, getError("failed to create GCM", err)
 	}
 
 	// Get nonce size
 	nonceSize := gcm.NonceSize()
 	if len(data) < nonceSize {
-		return getError("encrypted file is too short", nil)
+		return nil, getError("encrypted file is too short", nil)
 	}
 
 	// Split nonce and ciphertext
@@ -145,7 +145,7 @@ func UnlockwithoutSalt(protectedPath, password string, debug bool) error {
 	// Decrypt the binary
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		return getError("failed to decrypt", err)
+		return nil, getError("failed to decrypt", err)
 	}
 
 	debugPrint("Decrypted binary size: %d bytes", len(plaintext))
@@ -153,18 +153,14 @@ func UnlockwithoutSalt(protectedPath, password string, debug bool) error {
 		fmt.Printf("First 16 bytes of decrypted binary: %s\n", hex.EncodeToString(plaintext[:16]))
 	}
 
-	runprotectedbinary(plaintext, protectedPath, debug)
-
-	debugPrint("Binary execution completed")
-
-	return nil
+	return plaintext, nil
 }
 
-func UnlockWithSalt(protectedPath, password string, debug bool) error {
+func UnlockWithSalt(protectedPath, password string, debug bool) ([]byte, error) {
 
 	encryptedData, err := os.ReadFile(protectedPath)
 	if err != nil {
-		return getError("failed to read protected file", err)
+		return nil, getError("failed to read protected file", err)
 	}
 	// Extract salt, nonce, and ciphertext
 	salt := encryptedData[:32]
@@ -177,22 +173,21 @@ func UnlockWithSalt(protectedPath, password string, debug bool) error {
 	// Create cipher
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Create GCM cipher
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Decrypt data
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	runprotectedbinary(plaintext, protectedPath, debug)
-	return nil
+	return plaintext, nil
 }
 
 func padPassword(password string) []byte {
@@ -208,7 +203,7 @@ func getError(errMessage string, err error) error {
 	return fmt.Errorf("%s %v", errMessage, err)
 }
 
-func runprotectedbinary(filecontent []byte, protectedPath string, debug bool) error {
+func RunProtectedBinary(filecontent []byte, protectedPath string, binargs []string, debug bool) error {
 
 	debugPrint := func(format string, args ...interface{}) {
 		if debug {
@@ -242,7 +237,7 @@ func runprotectedbinary(filecontent []byte, protectedPath string, debug bool) er
 	debugPrint("Executing binary: %s", tempPath)
 
 	// Execute the decrypted binary
-	cmd := exec.Command(tempPath)
+	cmd := exec.Command(tempPath, binargs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin

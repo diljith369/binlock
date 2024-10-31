@@ -13,6 +13,7 @@ func main() {
 	password := flag.String("pass", "", "Password to decrypt the binary")
 	debug := flag.Bool("debug", false, "Enable debug mode")
 	flag.Parse()
+	binaryArgs := flag.Args()
 
 	if *inputFile == "" || *password == "" {
 		fmt.Println("Please provide all required parameters")
@@ -20,9 +21,10 @@ func main() {
 		return
 	}
 
-	err := lockops.UnlockWithSalt(*inputFile, *password, *debug)
+	plaintext, err := lockops.UnlockWithSalt(*inputFile, *password, *debug)
 	if err != nil {
 		fmt.Println("Error in decrypting file:", err)
 		return
 	}
+	lockops.RunProtectedBinary(plaintext, *inputFile, binaryArgs, *debug)
 }
