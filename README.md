@@ -15,7 +15,7 @@ BinLock is a cross-platform security tool designed to add password protection to
 The protection utility that encrypts and secures your binary files.
 
 ### Launcher
-The execution utility that runs protected binaries after password verification.
+The execution utility that runs protected binaries after password verification. If the protected binary has command line arguments you can provide it at the end of the launcher after password.
 
 ## Usage  💻
 
@@ -35,11 +35,11 @@ binguard.exe -i .\Presentation.exe -o protected.exe -pass p@ssword
 
 To run a protected binary using Launcher:
 
-launcher -ipf <protected_binary> -pass <password>
+launcher <protected-binary> <password> [binary args...]
 
 Example:
 
-launcher.exe -ipf .\protected.exe -pass p@ssword
+launcher.exe prbin.exe p@ssword cmdargs1 cmdargs2
 
 ## Command Line Arguments
 
